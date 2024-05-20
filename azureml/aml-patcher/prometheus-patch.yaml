@@ -1,0 +1,13 @@
+- op: replace
+  path: "/spec/baseImage"
+  value: "quay.io/prometheus/prometheus"
+- op: add
+  path: "/spec/initContainers/1"
+  value:
+    name: "init-config-reloader"
+    image: "quay.io/prometheus-operator/prometheus-config-reloader:v0.50.0"
+- op: add
+  path: "/spec/containers"
+  value: 
+  - name: "config-reloader"
+    image: "quay.io/prometheus-operator/prometheus-config-reloader:v0.50.0"

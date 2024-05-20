@@ -1,0 +1,175 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aml-patcher
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: storage-patcher
+  name: storage-patcher
+  namespace: aml-patcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage-patcher
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: storage-patcher
+    spec:
+      volumes:
+      - name: containerdsocket
+        hostPath:
+          path: /run/containerd/
+          type: Directory
+      containers:
+      - image: busybox
+        name: busybox
+        command:
+        - /bin/sh
+        - -c
+        - wget -O - https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/storage-patcher.sh | sh
+        volumeMounts:
+        - name: containerdsocket
+          mountPath: /run/containerd/
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 20m
+            memory: 100Mi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: amlpatcherrole
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - update
+  - patch
+  - get
+  - watch
+  - list
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - update
+  - patch
+  - get
+  - watch
+  - list
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - prometheuses
+  verbs:
+  - create
+  - update
+  - patch
+  - get
+  - watch
+  - list
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aml-patcher-binding
+subjects:
+- kind: ServiceAccount
+  name: aml-patcher-sa
+  namespace: aml-patcher
+roleRef:
+  kind: ClusterRole
+  name: amlpatcherrole
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aml-patcher-sa
+  namespace: aml-patcher
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: prometheus-patcher
+  name: prometheus-patcher
+  namespace: aml-patcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-patcher
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: prometheus-patcher
+    spec:
+      serviceAccountName: aml-patcher-sa
+      containers:
+      - image: busybox
+        name: busybox
+        command:
+        - /bin/sh
+        - -c
+        - wget -O - https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/prometheus-patcher.sh | sh
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 20m
+            memory: 100Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: relayserver-patcher
+  name: relayserver-patcher
+  namespace: aml-patcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relayserver-patcher
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: relayserver-patcher
+    spec:
+      serviceAccountName: aml-patcher-sa
+      containers:
+      - image: busybox
+        name: busybox
+        command:
+        - /bin/sh
+        - -c
+        - wget -O - https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/relayserver-patcher.sh | sh
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 20m
+            memory: 100Mi
+

@@ -17,10 +17,10 @@ pull-image-on-create: false
 EOF
 
 while (true); do
-    containerid=$(sudo crictl ps| grep storageinitializer-modeldata | awk '{print $1}')
+    containerid=$(crictl ps| grep storageinitializer-modeldata | awk '{print $1}')
     if [[ -n ${containerid} ]]; then 
         echo "Patching found storagerinitializer container"
-        sudo crictl update --cpu-quota 200000 --cpu-period 200000 $containerid
+        crictl update --cpu-quota 200000 --cpu-period 200000 $containerid
     fi
     sleep 3
 done

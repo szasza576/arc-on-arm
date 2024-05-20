@@ -6,7 +6,7 @@
 echo "Downloading crictl util..."
 defaulturl="https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.30.0/crictl-v1.30.0-linux-arm64.tar.gz"
 if [ -z ${crictlurl+x} ]; then crictlurl=$defaulturl; fi
-wget -O - $crictlurl | \
+wget -qO - $crictlurl 2> /dev/null | \
 tar -xz -C /usr/bin/
 
 # Configure crictl

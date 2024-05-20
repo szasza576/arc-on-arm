@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Use the "crictlurl" environmental variable to optionally specify the download URL.
 

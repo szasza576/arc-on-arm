@@ -17,8 +17,7 @@ while (true); do
             echo "Found a resource in namespace: $namespace but it is already patched."
         else
            echo "Patching relayserver deployment"
-           kubectl patch deployments -n $namespace relayserver --patch='{"spec":{"template":{"spec":{"containers":[{"name":"relayserver","image":"'${image/mcr.microsoft.com/localhost:5000}'"
-}]}}}}'
+           kubectl patch deployments -n $namespace relayserver --patch='{"spec":{"template":{"spec":{"containers":[{"name":"relayserver","image":"'${image/mcr.microsoft.com/localhost:5000}'"}]}}}}'
         fi
         sleeptime=120
     else

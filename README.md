@@ -1,22 +1,18 @@
-# DISCLAMER
+# DISCLAIMER
 The project is only for educational purposes and definitely NOT FOR PRODUCTION. Some of the steps are completely against of standard security principles (running container in privilege). There is no warranty and no SLA. Nobody takes responsibility to this concept. You get it as it is and you can use it on your own.
 
-The project is not supported, endorsed or encouraged by Microsoft. This is a personal (opinionated) project to demonstrate possible capabilities.
+The project is not supported, endorsed or encouraged by Microsoft. This is an independent personal (likely opinionated) project to demonstrate possible capabilities.
 
 # Introduction
-Azure Arc makes on-premise servers capable to connect to the Azure ecosystem and deploy Azure services to the connected servers. It deploys on top of a Kubernetes cluster and it requires "[extensions](https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/extensions-release)" to make the server/cluster capable to deploy the different services.
-
-Azure Arc is supported on ARM64 but most of the extensions aren't yet. Very likely in the next 1-2 year this will change and makes this project obsolete (crossed-fingers :)). It is also clearly stated in the [Arc documentation](https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/system-requirements#cluster-requirements).
-
 This project helps to deploy the Arc extensions on ARM64 boards. In some cases, it reaches the goal by QEMU emulator (running x86-64 binaries on ARM64) and in some cases it rebuilds some images.
 
-## The ARM board
-ARM boards were not famous about their compute power but more about their energy efficiency. Nevertheless they became more capable in the last years which makes them a good choice to edge cloud appliances.
+More detailed description can be found here: https://clidee.eu/2024/05/27/azureml-extension-on-arm64/
 
-I use an [Radxa Rock5B](https://radxa.com/products/rock5/5b/) (aka. OKDO Rock5B) board in this project because of the following reasons:
-- CPU: the Rockchip RK3588 CPU has 8 cores (4xCortex-A76 and 4xCortex-A55)
+# The ARM board
+The concept is tested on a [Radxa Rock5B](https://radxa.com/products/rock5/5b/) (aka. OKDO Rock5B) board because of the following reasons:
+- CPU: Rockchip RK3588 CPU with 8 cores (4x Cortex-A76 and 4x Cortex-A55)
 - Memory: 16GB (more than enough to host several apps)
-- eMMC and M2 options for fast storage (Arc is sensitive to has storage). You will need at least 64GB of storage but more is always better.
+- eMMC and M2 options for fast storage (Arc is sensitive to has storage). You will need at least 64GB of storage but more is always better. MicroSD card might be too slow for this use-case.
 - and most importantly an 6 TOPS NPU (Neural Processing Unit) --> an AI accelerator.
 
 You can read a detailed review about the board on [CNX Software's blog](https://www.cnx-software.com/2022/01/09/rock5-model-b-rk3588-single-board-computer/). Nevertheless there are other boards from different vendors with this SoC with similar capabilities.
@@ -24,24 +20,6 @@ You can read a detailed review about the board on [CNX Software's blog](https://
 [![Rock5B](./img/Rock5B.jpg)](./img/Rock5B.jpg)
 
 What about Raspberry PI (or other ARM)??? Well, I didn't tested it but I guess it shall work on an RPi-5 with 8GB memory as well. I will test it later if I have some spare time. For the AzureML, I strongly suggest to use an AI accelerator what the RPi is short of.
-
-## Solutions
-There are 3 different ways how the Azure engineers implemented their containers.
-
-### Own code and built binaries
-Azure engineres also use the classic way to write code, compile it and build a container around it. The source code might be GOLang, C++ or anything. These binaries are built for x86-64 and cannot be reverse engineered to port it to ARM64.
-
-We will use a QEMU emulator which will run the original x86-64 binaries on ARM64. This is slow method and far from being efficient but will save lot of time. It works almost all binaries with full transparency.
-
-As the extensions are mainly for management purposes hence loosing performance here is acceptable. Although, it is not recommended to use this method for the final workloads (AppServices, AzureML models, etc.).
-
-### .NET / C# code
-Some components were written in C#. The .NET core framework is sensitive to QEMU hence running these containers in an emulated environment will fail.
-
-The good news is that .NET compiles the source code to a interim object which is hardware agnostic. The .NET framework is responsible to the hardware adaptation. This means we can build a new ARM64 based container with the ARM64 specific .NET framework and just copy the component object from the original container.
-
-### 3rd party containers
-Azure also uses 3rd party containers like Prometheus without modification. In this case we just simply point our deployments to the original sources where ARM64 containers are available. In most cases we can just patch the Kubernetes manifest files.
 
 # Basic setup
 
@@ -82,13 +60,13 @@ Azure also uses 3rd party containers like Prometheus without modification. In th
 Attaching the node with Arc is easy as ARM is supported by Arc so this is just following the [documentation](https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/system-requirements).
 
 Before starting check if your cluster is the active context and switch if necessary:
-```bash
+```powershell
 kubectl config get-contexts
 
 kubectl config use-context <YourClusterName>
 ```
 
-```bash
+```powershell
 $ResourceGroup="arc-on-arm"
 $ClusterName="rock5b"
 $Location="westeurope"
@@ -130,10 +108,10 @@ docker push localhost:5000/azureml/amlarc/docker/relayserver:1.1.53
 ```
 
 ## Extension patchers
-There is a set of patcher scripts which helps you to easily change the images to ARM64 images.
+There is a set of patcher scripts which helps you to easily change the images to ARM64 images. This runs in the background and do the patching when needed.
 
 Deploy the patcher tools:
-```bash
+```powershell
 kubectl apply -f https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/aml-patcher.yaml
 ```
 
@@ -141,7 +119,7 @@ kubectl apply -f https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azu
 Now you can deploy the Azure ML extension as written in the documentation.
 
 You can use the portal and add the extension (deploy only the Prometheus and the Volcano components) or you can use the following Azure CLI command:
-```bash
+```powershell
 $ResourceGroup="arc-on-arm"
 $Location="westeurope"
 $ClusterName="rock5b"
@@ -161,14 +139,25 @@ az k8s-extension create `
   --scope cluster
 ```
 
+# Uninstall
+You can uninstall the extension in the normal way via the Portal.
+
+To uninstall the patcher components just delete the namespaces and restart the node (to remove QEMU):
+```bash
+kubectl delete ns qemu
+kubectl delete ns aml-patcher
+sudo reboot
+```
 
 # Troubleshoot
+## I get ImgPullError
+This repo is not continuously updated and if Azure updates the versions then it will fall out of sync. Please update the version numbers in the relevant files or open an issue here so I'm notified.
 ## Model inference timeout
 You can deploy AI models with the default Azure ML environment but those are based on x86-64 codes and hence those will run within a QEMU emulated environment. It means it will be extremely slow.
 
 You need to create an ARM64 environment image in AzureML and upload it to the AzureML's registry. It is important to build the whole image what AzureML can import. If you also specify a conda file then AzureML tries to build the image and of course it cannot deal with ARM64 images so it will fail. I will create a guide about this.
 
-Just as a reference: running a Yolov5 on a weak notebook with (Nvidia 940m](https://www.techpowerup.com/gpu-specs/geforce-940m.c2643) takes 150 ms to score an image. The same model can be deployed here but will run on CPU due to lacking Nvidia card* and also it runs inside QEMU and it takes 100 seconds (yes, not ms but sec) to score.
+Just as a reference: running a Yolov5 on a weak notebook with (Nvidia 940m](https://www.techpowerup.com/gpu-specs/geforce-940m.c2643) takes 150 ms to score an image. The same model can be deployed here but will run on CPU due to lacking Nvidia card* and also it runs inside QEMU and it takes 100 seconds (yes sec, not ms) to score.
 
 *As the Rock5B has an PCIe 3.0 x4 M.2. connector hence it is possible to attach an Nvidia card to it ... but we will use its internal AI accelerator in the next round.
 

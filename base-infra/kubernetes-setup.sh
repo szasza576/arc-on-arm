@@ -39,7 +39,7 @@ sudo sed -i '/swap/ s/^\(.*\)$/#\1/g' /etc/fstab
 sudo swapoff -a
 sudo systemctl disable swapfile.swap
 sudo systemctl stop swapfile.swap
-
+sudo systemctl mask swapfile.swap
 
 # Configure hosts file and hostname
 sudo hostnamectl set-hostname $MasterName

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.53 as source
+FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.56 as source
 
 FROM alpine:3.19
 
@@ -15,18 +15,18 @@ RUN apk add --upgrade --no-cache \
         libstdc++ \
         zlib
 
-ENV DOTNET_VERSION=7.0.17
+ENV DOTNET_VERSION=7.0.18
 
 RUN wget -O dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Runtime/$DOTNET_VERSION/dotnet-runtime-$DOTNET_VERSION-linux-musl-arm64.tar.gz \
-     && dotnet_sha512='e2cafec76472a62f3d48c03bd9e87ca355b73b4dc13bacd858f0175e6eb2da999419e66abcbed35775d37a8bb8ccbf8ddc87075605312d8833ecf77649f286aa' \
+     && dotnet_sha512='0bb9e0bf5f29bd3c7e2e756f5504807f416d345b42ddf501fbef3150a485795d5db84724e1e08b14482a3822934a028bb5fd59defaf2e5eda97aac6fb84490bd' \
      && echo "$dotnet_sha512  dotnet.tar.gz" | sha512sum -c -     && mkdir -p /usr/share/dotnet     && tar -oxzf dotnet.tar.gz -C /usr/share/dotnet \
      && rm dotnet.tar.gz \
      && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
     
-ENV ASPNET_VERSION=7.0.17
+ENV ASPNET_VERSION=7.0.18
 
 RUN wget -O aspnetcore.tar.gz https://dotnetcli.azureedge.net/dotnet/aspnetcore/Runtime/$ASPNET_VERSION/aspnetcore-runtime-$ASPNET_VERSION-linux-musl-arm64.tar.gz \
-    && aspnetcore_sha512='07097cdd1cead0d87825895e0371477d5b9683611df10f66cda6816b82d0d293aba73966951d30aa364728035c86ee6950a559eaf7cc2661205d5140d9fdb6d0' \
+    && aspnetcore_sha512='0b34bb383e6bbc17489bdba0c006a866e56a532453a49b95e3d39c830924462f45c6b757ebb416a32e40180b852178c35ec1b64ad761f33b63a98ef60e01ceea' \
     && echo "$aspnetcore_sha512  aspnetcore.tar.gz" | sha512sum -c - \
     && tar -oxzf aspnetcore.tar.gz -C /usr/share/dotnet ./shared/Microsoft.AspNetCore.App \
     && rm aspnetcore.tar.gz

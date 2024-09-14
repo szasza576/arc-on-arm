@@ -1,32 +1,41 @@
-FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.56 as source
+FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.61 as source
 
-FROM alpine:3.19
+FROM alpine:3.20
 
 CMD ["/bin/sh"]
 
-ENV ASPNETCORE_URLS=http://+:80 DOTNET_RUNNING_IN_CONTAINER=true DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+ENV APP_UID=1654 ASPNETCORE_HTTP_PORTS=8080 DOTNET_RUNNING_IN_CONTAINER=true DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
 
 RUN apk add --upgrade --no-cache \
-        ca-certificates \
-        krb5-libs \
+        ca-certificates-bundle \
         libgcc \
-        libintl \
         libssl3 \
         libstdc++ \
         zlib
 
-ENV DOTNET_VERSION=7.0.18
+RUN addgroup \
+    --gid=$APP_UID \
+    app \
+    && adduser \
+    --uid=$APP_UID \
+    --ingroup=app \
+    --disabled-password \
+    app
+
+ENV DOTNET_VERSION=8.0.7
 
 RUN wget -O dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Runtime/$DOTNET_VERSION/dotnet-runtime-$DOTNET_VERSION-linux-musl-arm64.tar.gz \
-     && dotnet_sha512='0bb9e0bf5f29bd3c7e2e756f5504807f416d345b42ddf501fbef3150a485795d5db84724e1e08b14482a3822934a028bb5fd59defaf2e5eda97aac6fb84490bd' \
-     && echo "$dotnet_sha512  dotnet.tar.gz" | sha512sum -c -     && mkdir -p /usr/share/dotnet     && tar -oxzf dotnet.tar.gz -C /usr/share/dotnet \
-     && rm dotnet.tar.gz \
-     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
-    
-ENV ASPNET_VERSION=7.0.18
+    && dotnet_sha512='249246082498d3f6b5a3a0347527ac5a98ecd0fde235d6bb48bb18e4bb031eda6833526035279e99e97fbb5dc58fba132c9bed5f33442c47e571a91f648fa863' \
+    && echo "$dotnet_sha512  dotnet.tar.gz" | sha512sum -c - \
+    && mkdir -p /usr/share/dotnet \
+    && tar -oxzf dotnet.tar.gz -C /usr/share/dotnet \
+    && rm dotnet.tar.gz \
+    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+ENV ASPNET_VERSION=8.0.7
 
 RUN wget -O aspnetcore.tar.gz https://dotnetcli.azureedge.net/dotnet/aspnetcore/Runtime/$ASPNET_VERSION/aspnetcore-runtime-$ASPNET_VERSION-linux-musl-arm64.tar.gz \
-    && aspnetcore_sha512='0b34bb383e6bbc17489bdba0c006a866e56a532453a49b95e3d39c830924462f45c6b757ebb416a32e40180b852178c35ec1b64ad761f33b63a98ef60e01ceea' \
+    && aspnetcore_sha512='ca5b8d9fbdbe3c38f560d662705be00174885fc7abd875ac056c97788410329af9017ec6052a146b9414d26ff956accdfdc6ef315aaf7c6936b0520a9320493f' \
     && echo "$aspnetcore_sha512  aspnetcore.tar.gz" | sha512sum -c - \
     && tar -oxzf aspnetcore.tar.gz -C /usr/share/dotnet ./shared/Microsoft.AspNetCore.App \
     && rm aspnetcore.tar.gz

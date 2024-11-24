@@ -1,0 +1,20 @@
+name: project_environment
+dependencies:
+- python=3.9
+- pip
+- pip:
+  - azureml-inference-server-http
+  - azureml-contrib-services
+  - pydantic<2.0
+#  - pyyaml
+  - opencv-python-headless
+  - pandas
+  - numpy<2
+  - onnxruntime
+  - torch
+- requests
+- wheel
+channels:
+- anaconda
+- conda-forge
+- pytorch

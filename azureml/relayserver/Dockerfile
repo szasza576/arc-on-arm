@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.61 as source
+FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.66 as source
 
 FROM alpine:3.20
 

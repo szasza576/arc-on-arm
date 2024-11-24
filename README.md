@@ -103,8 +103,8 @@ The relayserver component uses a C# code and hence that container shall be rebui
 
 Build ARM64 container for relayserver and push to the local repository (run it on the ARM board):
 ```bash
-docker build -t localhost:5000/azureml/amlarc/docker/relayserver:1.1.61 https://github.com/szasza576/arc-on-arm.git#main:azureml/relayserver
-docker push localhost:5000/azureml/amlarc/docker/relayserver:1.1.61
+docker build -t localhost:5000/azureml/amlarc/docker/relayserver:1.1.66 https://github.com/szasza576/arc-on-arm.git#main:azureml/relayserver
+docker push localhost:5000/azureml/amlarc/docker/relayserver:1.1.66
 ```
 
 ## Extension patchers

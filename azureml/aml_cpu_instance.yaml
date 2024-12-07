@@ -1,0 +1,12 @@
+apiVersion: amlarc.azureml.com/v1alpha1
+kind: InstanceType
+metadata:
+  name: cpuinstancetype
+spec:
+  resources:
+    limits:
+      cpu: "8"
+      memory: "4Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"

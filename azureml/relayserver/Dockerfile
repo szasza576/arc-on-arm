@@ -1,6 +1,6 @@
-FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.66 as source
+FROM mcr.microsoft.com/azureml/amlarc/docker/relayserver:1.1.79 as source
 
-FROM alpine:3.20
+FROM alpine:3.21
 
 CMD ["/bin/sh"]
 
@@ -22,20 +22,20 @@ RUN addgroup \
     --disabled-password \
     app
 
-ENV DOTNET_VERSION=8.0.7
+ENV DOTNET_VERSION=8.0.15
 
 RUN wget -O dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Runtime/$DOTNET_VERSION/dotnet-runtime-$DOTNET_VERSION-linux-musl-arm64.tar.gz \
-    && dotnet_sha512='249246082498d3f6b5a3a0347527ac5a98ecd0fde235d6bb48bb18e4bb031eda6833526035279e99e97fbb5dc58fba132c9bed5f33442c47e571a91f648fa863' \
+    && dotnet_sha512='a52a3d2518301fd6571a16620b8802022da775acd70d78195bd75ed4729c0d21fa4f1b5b86869c11fb9f3bdea878deabc3c9d09ea31d8d2b2e43bc22e3b76f3d' \
     && echo "$dotnet_sha512  dotnet.tar.gz" | sha512sum -c - \
     && mkdir -p /usr/share/dotnet \
     && tar -oxzf dotnet.tar.gz -C /usr/share/dotnet \
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-ENV ASPNET_VERSION=8.0.7
+ENV ASPNET_VERSION=8.0.15
 
 RUN wget -O aspnetcore.tar.gz https://dotnetcli.azureedge.net/dotnet/aspnetcore/Runtime/$ASPNET_VERSION/aspnetcore-runtime-$ASPNET_VERSION-linux-musl-arm64.tar.gz \
-    && aspnetcore_sha512='ca5b8d9fbdbe3c38f560d662705be00174885fc7abd875ac056c97788410329af9017ec6052a146b9414d26ff956accdfdc6ef315aaf7c6936b0520a9320493f' \
+    && aspnetcore_sha512='025b2cc23591a1475755fc3b321e7d05aacda34c5616170eb47e4842bd978a4636d47d87c0666dadf7592ffd82db59427bcef953a0a5d1842d8c321d01c01e6e' \
     && echo "$aspnetcore_sha512  aspnetcore.tar.gz" | sha512sum -c - \
     && tar -oxzf aspnetcore.tar.gz -C /usr/share/dotnet ./shared/Microsoft.AspNetCore.App \
     && rm aspnetcore.tar.gz

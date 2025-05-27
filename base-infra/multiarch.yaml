@@ -17,7 +17,7 @@ spec:
       template:
         spec:
           containers:
-          - image: tonistiigi/binfmt
+          - image: tonistiigi/binfmt:qemu-v8.1.5
             name: multi-platform
             args:
             - '--install'

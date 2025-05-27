@@ -1,6 +1,9 @@
 - op: replace
   path: "/spec/baseImage"
   value: "quay.io/prometheus/prometheus"
+- op: replace
+  path: "/spec/image"
+  value: "quay.io/prometheus/prometheus:v2.21.0"
 - op: add
   path: "/spec/initContainers/-"
   value:

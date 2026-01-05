@@ -91,6 +91,6 @@ You can deploy AI models with the default Azure ML environment but those are bas
 
 You need to create an ARM64 environment image in AzureML and upload it to the AzureML's registry. It is important to build the whole image what AzureML can import. If you also specify a conda file then AzureML tries to build the image and of course it cannot deal with ARM64 images so it will fail. I will create a guide about this.
 
-Just as a reference: running a Yolov5 on a weak notebook with (Nvidia 940m](https://www.techpowerup.com/gpu-specs/geforce-940m.c2643) takes 150 ms to score an image. The same model can be deployed here but will run on CPU due to lacking Nvidia card* and also it runs inside QEMU and it takes 100 seconds (yes sec, not ms) to score.
+Just as a reference: running a Yolov5 on a weak notebook with [Nvidia 940m](https://www.techpowerup.com/gpu-specs/geforce-940m.c2643) takes 150 ms to score an image. The same model can be deployed here but will run on CPU due to lacking Nvidia card* and also it runs inside QEMU and it takes 100 seconds (yes sec, not ms) to score.
 
 *As the Rock5B has an PCIe 3.0 x4 M.2. connector hence it is possible to attach an Nvidia card to it ... but we will use its internal AI accelerator in the next round.

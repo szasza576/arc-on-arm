@@ -102,41 +102,41 @@ kind: ServiceAccount
 metadata:
   name: aml-patcher-sa
   namespace: aml-patcher
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  creationTimestamp: null
-  labels:
-    app: prometheus-patcher
-  name: prometheus-patcher
-  namespace: aml-patcher
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: prometheus-patcher
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        app: prometheus-patcher
-    spec:
-      serviceAccountName: aml-patcher-sa
-      containers:
-      - image: busybox
-        name: busybox
-        command:
-        - /bin/sh
-        - -c
-        - wget -O - https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/prometheus-patcher.sh | sh
-        resources:
-          limits:
-            cpu: 200m
-            memory: 100Mi
-          requests:
-            cpu: 20m
-            memory: 100Mi
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  creationTimestamp: null
+#  labels:
+#    app: prometheus-patcher
+#  name: prometheus-patcher
+#  namespace: aml-patcher
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: prometheus-patcher
+#  template:
+#    metadata:
+#      creationTimestamp: null
+#      labels:
+#        app: prometheus-patcher
+#    spec:
+#      serviceAccountName: aml-patcher-sa
+#      containers:
+#      - image: busybox
+#        name: busybox
+#        command:
+#        - /bin/sh
+#        - -c
+#        - wget -O - https://raw.githubusercontent.com/szasza576/arc-on-arm/main/azureml/aml-patcher/prometheus-patcher.sh | sh
+#        resources:
+#          limits:
+#            cpu: 200m
+#            memory: 100Mi
+#          requests:
+#            cpu: 20m
+#            memory: 100Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
